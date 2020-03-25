@@ -1,0 +1,45 @@
+*Cmos Inverter involving equating Rise and Fall Time
+**Including suitable model definition files
+.include model.txt 
+**Variables to be used in program
+.param lambda=90n	
+.param Wn=0.6u
+.param Wp=1.55795u
+
+**name D G S B type length width  area of source  perimeter of source  area of drain   perimeter of drain-------------------- 
+***------------------------------------- NMOS-----------------------------------------------------------------------------***
+
+m_n1 output input 0 0 cmosn L=0.4u W=Wn AS={4*lambda*Wn} PS={2*Wn+8*lambda} AD={4*lambda*Wn} PD={2*Wn+8*lambda}
+
+
+
+****-------------------------------------PMOS----------------------------------------------------------------------------****
+m_p1 output input sup sup cmosp L=0.4u W=Wp AS={4*lambda*Wp} PS={2*Wp+8*lambda} AD={4*lambda*Wp} PD={2*Wp+8*lambda}
+
+**Attaching the load
+C_load 0 output 0.1p
+	
+**Defining Supply
+Vdd sup 0 dc 3.3v	
+
+**Setting Up the input pulse –----------------------------------------------------------------------------------------------
+** pulse(<initial value> <pulsed value> <Timedelay> <risetime> <falltime> <pulsewidth> <period>)**
+vin input 0 pulse(0 3.3 0 0.5p 0.5p 0.1u 0.2u)
+
+**Running Transient analysis –-----------------------------------------------------------------------------------------------
+*** .tran <tstep> <tstop> ***
+.tran 1p .6us
+
+**Measurement of rise time and fall time –-----------------------------------------------------------------------------------
+.measure tran rise_output trig v(output) val=0.33 rise=1 targ v(output) val=2.97 rise=1
+.measure tran fall trig v(output) val=2.97 fall=1 targ v(output) val=0.33 fall=1
+.measure tran delay trig v(input) val=1.65 rise=1 targ v(output) val=1.65 fall=1
+
+**Output plotting –----------------------------------------------------------------------------------------------------------
+.control
+run
+plot v(output), v(input)
+**hardcopy [file name] [plot arguments]
+.endc
+.end
+
